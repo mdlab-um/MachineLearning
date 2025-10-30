@@ -6,6 +6,8 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+import plotly.io as pio
+pio.renderers.default = 'browser'
 
 def get_colorlabels():
     # --- Load the encoded mammoth data (for color labels) ---
