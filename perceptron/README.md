@@ -1,22 +1,25 @@
-## Breast Tumor Diagnosis 
+## Chinese Character MNIST
+The [dataset](https://www.kaggle.com/datasets/gpreda/chinese-mnist) uploaded by Gabriel Preda on Kaggle, contains handwritten Chinese numerals produced by 100 volunteers. Each participant wrote the 15 numerals on 10 sheets, yielding 15 000 images (300×300).
 
 ### Dataset
-```python
-pip install ucimlrepo
-from ucimlrepo import fetch_ucirepo 
-breast_cancer_wisconsin_diagnostic = fetch_ucirepo(id=17) 
+Download via KaggleHub:
+``` python
+import kagglehub
+kagglehub.dataset_download("gpreda/chinese-mnist")
 ```
+The dataset includes:
+* `chinese_mnist.csv` — metadata with suite_id, sample_id, code, and the character mapping (see table below).
+    
+    <img src="chinese_mnist.png" alt="Mapping" width="320"/>
+* `data` folder with 15,000 jpg images (`input_<suite>_<sample>_<code>.jpg`)
 
-### Idea
-The Diagnostic Wisconsin Breast Cancer dataset ([UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic)) contains features extracted from digitized images of fine needle aspirates (FNA) of breast masses to support tumor diagnosis. Each record represents a single cell-sample and includes a diagnosis label (M = malignant, B = benign). The dataset has 569 instances with a class distribution of 212 malignant and 357 benign samples.
+    <img src="input_28_8_13.jpg" alt="example of image" width="100"/>
 
-For this week, try to implement the perceptron algorithm for prediction.
-
-### Recommendations 
-1. dimensionality reduction 
-2. select relevant features
-3. 80/20 for training and testing
+### Goal
+For this week, train a perceptron (or variations) to classify the handwritten characters.
 
 ### Final Remark
-1. try not to directly use top-level API for implementation
-2. Have fun!
+Use whatever you need — and have fun!
+
+### Acknowledgements
+I want to thank Gabriel Preda for preprocessed the data and uploaded to kaggle for sharing. Dr. K Nazarpour and Dr. M Chen from Newcastle University, who collected the data.
