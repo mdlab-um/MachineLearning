@@ -12,8 +12,7 @@ from torch.utils.data import DataLoader
 import copy
 
 import os
-if not os.path.exists("./results"):
-    os.mkdir("./results")
+os.mkdirs("./results/", exist_ok=True)
 
 class HyperparameterSearch:
     """
@@ -212,6 +211,8 @@ class HyperparameterSearch:
             from CNN_module import CNN, ACTIVATIONS  # Import here to avoid circular dependency
             model = CNN(**model_config)
             model.to(self.device)
+
+            # print(model)
 
             # Create optimizer and scheduler
             optimizer = optim.Adam(
@@ -435,7 +436,9 @@ def example_training_hyperparameter_search():
         'use_maxpooling_every': 1,
         'fc_layer_sizes': [256, 15],
         'input_size': (64, 64),
-        'activation': 'relu'
+        'activation': 'relu',
+        'use_batchnorm': False,
+        'dropout': 0.2,
     }
 
     # Define training hyperparameter grid
@@ -487,18 +490,16 @@ def example_architecture_hyperparameter_search():
     # Define architecture hyperparameter grid
     arch_param_grid = {
         'conv_channels': [
+            [16, 32],
             [32, 64],
-            [64, 128],
-            [64, 128, 256],
-            [32, 64, 128, 256]
+            [8, 16, 32]
         ],
         'kernel_sizes': [3, 5],
-        'activation': ['relu', 'gelu', 'leakyrelu'],
+        'activation': ['relu',],
         'fc_layer_sizes': [
-            [128, 15],
-            [256, 15],
-            [512, 256, 15]
-        ]
+            [64, 15],
+        ],
+        'dropout': [0.2, 0.4],
     }
 
     # Run search (limit combinations for demo)
@@ -527,5 +528,5 @@ if __name__ == "__main__":
     print("2. example_architecture_hyperparameter_search() - Search architecture hyperparameters")
 
     # Uncomment one of these to run:
-    results = example_training_hyperparameter_search()
-    # results = example_architecture_hyperparameter_search()
+    # results = example_training_hyperparameter_search()
+    results = example_architecture_hyperparameter_search()

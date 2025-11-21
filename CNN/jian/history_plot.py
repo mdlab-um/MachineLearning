@@ -40,9 +40,9 @@ def plot_training_history(csv_filename):
     plt.tight_layout()
 
     # Save plot
-    output_filename = csv_filename.replace('.csv', '_plot.png')
-    plt.savefig(output_filename, dpi=300, bbox_inches='tight')
-    print(f"Plot saved to: {output_filename}")
+    # output_filename = csv_filename.replace('.csv', '_plot.png')
+    # plt.savefig(output_filename, dpi=300, bbox_inches='tight')
+    # print(f"Plot saved to: {output_filename}")
 
     # Show plot
     plt.show()

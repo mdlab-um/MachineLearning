@@ -13,7 +13,7 @@ from datasets import train_dataset, val_dataset, test_dataset, device
 
 
 ###### training
-seed = 1
+seed = 42
 random.seed(seed)
 np.random.seed(seed)
 if torch.cuda.is_available():
@@ -24,7 +24,7 @@ if torch.cuda.is_available():
     torch.backends.cudnn.benchmark = False
 
 # --- Hyperparameters ---
-batch_size = 64
+batch_size = 32
 epochs = 30
 learning_rate = 0.001
 scheduler_stepsize = 10
@@ -37,15 +37,17 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num
 
 # --- model-specific hyperparameters ---
 input_channels=1
-conv_channels=[32, 64, 128]
+conv_channels=[8, 16, 32]
 kernel_sizes=5
 use_padding=True
 padding_size=int((kernel_sizes-1) // 2)
 use_maxpooling=True
 use_maxpooling_every=1
-fc_layer_sizes=[128, 15] # output 15 class
+fc_layer_sizes=[64, 15] # output 15 class
 input_size=(64, 64)
 activation="relu"
+use_batchnorm=False
+dropout=0.4
 
 # --- Model ---
 model = CNN(
@@ -58,9 +60,11 @@ model = CNN(
     use_maxpooling_every=use_maxpooling_every,
     fc_layer_sizes=fc_layer_sizes,
     input_size=input_size,
-    activation=activation
+    activation=activation,
+    dropout=dropout
 )
 model.to(device)
+print(model)
 
 # --- Loss and optimizer ---
 criterion = nn.CrossEntropyLoss()  # good for multi-class classification
@@ -148,3 +152,34 @@ timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 history_filename = f"./results/training_history_{timestamp}.csv"
 history_df.to_csv(history_filename, index=False)
 print(f"\nTraining history saved to: {history_filename}")
+
+
+# save weights
+os.makedirs("./results", exist_ok=True)
+save_path = f"./results/weights_{timestamp}.pt"
+torch.save(model.state_dict(), save_path)
+print(f"Model weights saved to: {save_path}")
+
+
+# save model config
+import json
+config = {
+    "input_channels": input_channels,
+    "conv_channels": conv_channels,
+    "kernel_sizes": kernel_sizes,
+    "use_padding": use_padding,
+    "padding_size": padding_size,
+    "use_maxpooling": use_maxpooling,
+    "use_maxpooling_every": use_maxpooling_every,
+    "maxpooling_size": 2,
+    "fc_layer_sizes": fc_layer_sizes,
+    "input_size": list(input_size),
+    "activation": activation,
+    'use_batchnorm': use_batchnorm,
+    "dropout": dropout
+}
+
+config_path = f"./results/model_config_{timestamp}.json"
+with open(config_path, "w") as f:
+    json.dump(config, f, indent=4)
+print(f"Model configuration saved to: {config_path}")
