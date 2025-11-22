@@ -13,7 +13,7 @@ def plot_training_history(csv_filename):
     history_df = pd.read_csv(csv_filename)
 
     # Create side-by-side plots
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4))
 
     # Plot loss
     ax1.plot(history_df['epoch'], history_df['train_loss'], 'b-',
@@ -22,7 +22,7 @@ def plot_training_history(csv_filename):
              label='Val Loss', linewidth=2)
     ax1.set_xlabel('Epoch', fontsize=12)
     ax1.set_ylabel('Loss', fontsize=12)
-    ax1.set_title('Training and Validation Loss', fontsize=14, fontweight='bold')
+    ax1.set_title('Loss history', fontsize=14, fontweight='bold')
     ax1.legend(fontsize=10)
     ax1.grid(True, alpha=0.3)
 
@@ -33,16 +33,19 @@ def plot_training_history(csv_filename):
              label='Val Accuracy', linewidth=2)
     ax2.set_xlabel('Epoch', fontsize=12)
     ax2.set_ylabel('Accuracy', fontsize=12)
-    ax2.set_title('Training and Validation Accuracy', fontsize=14, fontweight='bold')
+    ax2.set_ylim([0, 1])
+    ax2.set_title('Accuracy history', fontsize=14, fontweight='bold')
     ax2.legend(fontsize=10)
     ax2.grid(True, alpha=0.3)
 
     plt.tight_layout()
 
     # Save plot
-    # output_filename = csv_filename.replace('.csv', '_plot.png')
-    # plt.savefig(output_filename, dpi=300, bbox_inches='tight')
-    # print(f"Plot saved to: {output_filename}")
+    import os
+    os.makedirs('./results', exist_ok=True)
+    output_filename='./results/training_history.png'
+    plt.savefig(output_filename)
+    print(f"Plot saved to: {output_filename}")
 
     # Show plot
     plt.show()

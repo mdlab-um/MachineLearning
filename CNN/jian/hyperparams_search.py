@@ -70,8 +70,8 @@ def objective(trial):
     # Hyperparameter search space
     channel1 = trial.suggest_categorical("channel1", [16, 32])
     channel2 = trial.suggest_categorical("channel2", [16, 32])
-    kernel_sizes = trial.suggest_categorical("kernel_size", [3, 5])
-    dropout = trial.suggest_categorical("dropout", [0, 0.2])
+    kernel_sizes = trial.suggest_categorical("kernel_size", [3, 5, 7])
+    dropout = trial.suggest_categorical("dropout", [0.2])
     # lr = trial.suggest_loguniform("lr", 1e-5, 1e-2)
     # activation = trial.suggest_categorical("activation", ["relu",])
 
@@ -112,8 +112,10 @@ study.optimize(objective, n_trials=16)  # adjust n_trials
 # ----------------------------
 # Save results to CSV
 # ----------------------------
-df = study.trials_dataframe()
 os.makedirs("./results", exist_ok=True)
-df.to_csv("./results/hypersearch_results.csv", index=False)
+from datetime import datetime
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+df = study.trials_dataframe()
+df.to_csv(f"./results/hypersearch_results_{timestamp}.csv", index=False)
 print("Best hyperparameters:", study.best_trial.params)
 print("Best validation loss:", study.best_trial.value)

@@ -9,9 +9,9 @@
         32
     ],
     "output_dim": 15,
-    "kernel_sizes": 3,
+    "kernel_sizes": 5,
     "stride": 1,
-    "padding": 1,
+    "padding": 2,
     "use_maxpooling_every": 1,
     "pooling_size": 2,
     "fc_layer_sizes": [

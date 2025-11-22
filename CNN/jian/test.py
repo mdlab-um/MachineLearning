@@ -14,20 +14,23 @@ import sys
 with open(sys.argv[1], "r") as f:
     cfg = json.load(f)
 
-model = CNN(
-    input_sizes=cfg["input_sizes"],
-    convol_channels=cfg["convol_channels"],
-    output_dim=cfg["output_dim"],
-    kernel_sizes=cfg["kernel_sizes"],
-    stride=cfg["stride"],
-    padding=cfg["padding"],
-    use_maxpooling_every=cfg["use_maxpooling_every"],
-    pooling_size=cfg["pooling_size"],
-    fc_layer_sizes=cfg["fc_layer_sizes"],
-    activation=cfg["activation"],
-    use_batchnorm=cfg["use_batchnorm"],
-    dropout=cfg["dropout"]
-)
+
+model = CNN(**cfg)
+
+# model = CNN(
+#     input_sizes=cfg["input_sizes"],
+#     convol_channels=cfg["convol_channels"],
+#     output_dim=cfg["output_dim"],
+#     kernel_sizes=cfg["kernel_sizes"],
+#     stride=cfg["stride"],
+#     padding=cfg["padding"],
+#     use_maxpooling_every=cfg["use_maxpooling_every"],
+#     pooling_size=cfg["pooling_size"],
+#     fc_layer_sizes=cfg["fc_layer_sizes"],
+#     activation=cfg["activation"],
+#     use_batchnorm=cfg["use_batchnorm"],
+#     dropout=cfg["dropout"]
+# )
 
 # -- Load weights --
 model.load_state_dict(torch.load(sys.argv[2], map_location="cpu"))
@@ -93,6 +96,10 @@ def get_predictions_and_confusion(model, test_dataset, batch_size=64):
     plt.xlabel("Predicted Label")
     plt.ylabel("True Label")
     plt.title("Confusion Matrix")
+    # save out
+    import os
+    os.makedirs('./results', exist_ok=True)
+    plt.savefig('./results/testing_confmat.png')
     plt.show()
 
     return all_labels, all_preds, cm

@@ -39,7 +39,7 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num
 input_sizes=(1, 64, 64)
 convol_channels=[16, 32]
 output_dim=15
-kernel_sizes=3
+kernel_sizes=5
 stride=1
 padding=int((kernel_sizes-1) // 2)
 use_maxpooling_every=1
