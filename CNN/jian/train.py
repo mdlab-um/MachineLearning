@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import warnings
 import random
-from CNN_module import CNN, ACTIVATIONS
+from CNN import CNN, ACTIVATIONS
 from datasets import train_dataset, val_dataset, test_dataset, device
 
 
@@ -24,8 +24,8 @@ if torch.cuda.is_available():
     torch.backends.cudnn.benchmark = False
 
 # --- Hyperparameters ---
-batch_size = 32
-epochs = 30
+batch_size = 64
+epochs = 20
 learning_rate = 0.001
 scheduler_stepsize = 10
 scheduler_gamma = 0.5
@@ -36,35 +36,43 @@ val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_w
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
 
 # --- model-specific hyperparameters ---
-input_channels=1
-conv_channels=[8, 16, 32]
-kernel_sizes=5
-use_padding=True
-padding_size=int((kernel_sizes-1) // 2)
-use_maxpooling=True
+input_sizes=(1, 64, 64)
+convol_channels=[16, 32]
+output_dim=15
+kernel_sizes=3
+stride=1
+padding=int((kernel_sizes-1) // 2)
 use_maxpooling_every=1
-fc_layer_sizes=[64, 15] # output 15 class
-input_size=(64, 64)
+pooling_size=2
+fc_layer_sizes=[128, ] # output 15 class
 activation="relu"
 use_batchnorm=False
-dropout=0.4
+dropout=0.2
 
 # --- Model ---
 model = CNN(
-    input_channels=input_channels,
-    conv_channels=conv_channels,
+    input_sizes=input_sizes,
+    convol_channels=convol_channels,
+    output_dim=output_dim,
     kernel_sizes=kernel_sizes,
-    use_padding=use_padding,
-    padding_size=padding_size,
-    use_maxpooling=use_maxpooling,
+    stride=stride,
+    padding=padding,
     use_maxpooling_every=use_maxpooling_every,
+    pooling_size=pooling_size,
     fc_layer_sizes=fc_layer_sizes,
-    input_size=input_size,
     activation=activation,
+    use_batchnorm=use_batchnorm,
     dropout=dropout
 )
 model.to(device)
 print(model)
+
+# --- Number of parameters ---
+num_params = sum(p.numel() for p in model.parameters())
+num_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+print(f"Total parameters: {num_params:,}")
+print(f"Trainable parameters: {num_trainable:,}")
 
 # --- Loss and optimizer ---
 criterion = nn.CrossEntropyLoss()  # good for multi-class classification
@@ -147,6 +155,7 @@ history_df = pd.DataFrame({
 })
 
 # Create a timestamp for unique filenames
+os.makedirs("./results", exist_ok=True)
 from datetime import datetime
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 history_filename = f"./results/training_history_{timestamp}.csv"
@@ -155,7 +164,6 @@ print(f"\nTraining history saved to: {history_filename}")
 
 
 # save weights
-os.makedirs("./results", exist_ok=True)
 save_path = f"./results/weights_{timestamp}.pt"
 torch.save(model.state_dict(), save_path)
 print(f"Model weights saved to: {save_path}")
@@ -164,20 +172,19 @@ print(f"Model weights saved to: {save_path}")
 # save model config
 import json
 config = {
-    "input_channels": input_channels,
-    "conv_channels": conv_channels,
+    "input_sizes":input_sizes,
+    "convol_channels":convol_channels,
+    "output_dim": output_dim,
     "kernel_sizes": kernel_sizes,
-    "use_padding": use_padding,
-    "padding_size": padding_size,
-    "use_maxpooling": use_maxpooling,
+    "stride": stride,
+    "padding": padding,
     "use_maxpooling_every": use_maxpooling_every,
-    "maxpooling_size": 2,
+    "pooling_size": pooling_size,
     "fc_layer_sizes": fc_layer_sizes,
-    "input_size": list(input_size),
     "activation": activation,
-    'use_batchnorm': use_batchnorm,
+    "use_batchnorm": use_batchnorm,
     "dropout": dropout
-}
+    }
 
 config_path = f"./results/model_config_{timestamp}.json"
 with open(config_path, "w") as f:

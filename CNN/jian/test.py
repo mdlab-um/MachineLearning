@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 from datasets import test_dataset, device
-from CNN_module import CNN, ACTIVATIONS
+from CNN import CNN, ACTIVATIONS
 import json
 import sys
 
@@ -15,16 +15,15 @@ with open(sys.argv[1], "r") as f:
     cfg = json.load(f)
 
 model = CNN(
-    input_channels=cfg["input_channels"],
-    conv_channels=cfg["conv_channels"],
+    input_sizes=cfg["input_sizes"],
+    convol_channels=cfg["convol_channels"],
+    output_dim=cfg["output_dim"],
     kernel_sizes=cfg["kernel_sizes"],
-    use_padding=cfg["use_padding"],
-    padding_size=cfg["padding_size"],
-    use_maxpooling=cfg["use_maxpooling"],
+    stride=cfg["stride"],
+    padding=cfg["padding"],
     use_maxpooling_every=cfg["use_maxpooling_every"],
-    maxpooling_size=cfg["maxpooling_size"],
+    pooling_size=cfg["pooling_size"],
     fc_layer_sizes=cfg["fc_layer_sizes"],
-    input_size=tuple(cfg["input_size"]),
     activation=cfg["activation"],
     use_batchnorm=cfg["use_batchnorm"],
     dropout=cfg["dropout"]
@@ -88,7 +87,7 @@ def get_predictions_and_confusion(model, test_dataset, batch_size=64):
     cm = confusion_matrix(all_labels, all_preds, labels=np.arange(15))
 
     # Plot confusion matrix
-    plt.figure(figsize=(10, 8))
+    plt.figure(figsize=(6, 5))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
                 xticklabels=np.arange(15), yticklabels=np.arange(15))
     plt.xlabel("Predicted Label")
