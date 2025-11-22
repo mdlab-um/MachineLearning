@@ -67,7 +67,7 @@ if __name__ == '__main__':
     # -----------------------------
 
     SEED = 1
-    set_seed(SEED, deterministic=False)
+    set_seed(SEED, deterministic=True)
     device = get_device()
     print(f"Using device: {device}")
 
