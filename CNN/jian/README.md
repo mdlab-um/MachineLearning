@@ -41,18 +41,60 @@ We want to search for an appropriate combination of model-sepcific hyperparamter
 The code below shows how to examine the searching result (though it will be printed out when runing the script).
 
 ```python
-df = pd.read_csv("./results/hypersearch_results.csv")
+df = pd.read_csv("./results/hypersearch_results*.csv")
 # the combination gives the best validation accuracy:
 df.loc[df['value'].idxmax()]
 # -->
+    seed                                        7445
     params_channel1                               16
-    params_channel2                               32
+    params_channel2                               16
     params_dropout                               0.2
     params_kernel_size                             3
 ```     
 
 Here, I only searched for two convolutional layers with different channel numbers, dropout, and kernel size. However, more search can be done by modifying the `hyperparameter_search.py` script.
 
+
+```text
+combination 1:
+    kernel_sizes=3
+    model_config = {
+    "input_sizes": (1, 64, 64),
+    "convol_channels": [32, 32],
+    "output_dim": 15,
+    "kernel_sizes": kernel_sizes,
+    "stride": 1,
+    "padding": int(kernel_sizes-1)//2,
+    "use_maxpooling_every": 1,
+    "pooling_size": 2,
+    "fc_layer_sizes": [128],
+    "activation": "relu",
+    "use_batchnorm": False,
+    "dropout": 0.2
+    }
+    Val acc: 0.9658
+    check: ./results/*20251122_140700*.csv, pt
+
+combination 2:
+    kernel_sizes=3
+    model_config = {
+    "input_sizes": (1, 64, 64),
+    "convol_channels": [16, 16],
+    "output_dim": 15,
+    "kernel_sizes": kernel_sizes,
+    "stride": 1,
+    "padding": int(kernel_sizes-1)//2,
+    "use_maxpooling_every": 1,
+    "pooling_size": 2,
+    "fc_layer_sizes": [128],
+    "activation": "relu",
+    "use_batchnorm": False,
+    "dropout": 0.2
+    }
+    Val acc: 0.9556
+    check: ./results/*20251122_141222*.csv, pt
+
+```
 
 ## 4. Training
 `train.py`: use the best hyperparameter combination from above, we trained the model with:
@@ -68,7 +110,7 @@ Final results will be stored in `./results`, which will be created if not alread
 `test.py` reports the final model performance on the testing dataset for the classification task and plot the confusion matrix.
 
 ```python
-python test.py ./results/model_config_20251122_093024.json ./results/weights_20251122_093024.pt
+python test.py ./results/model_config_*.json ./results/weights_*.pt
 # -->
 # Test Loss: 0.1390, Test Acc: 0.9609
 ```

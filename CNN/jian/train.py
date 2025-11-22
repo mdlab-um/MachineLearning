@@ -67,7 +67,7 @@ if __name__ == '__main__':
     # -----------------------------
 
     SEED = 1
-    set_seed(SEED, deterministic=True)
+    set_seed(SEED, deterministic=False)
     device = get_device()
     print(f"Using device: {device}")
 
@@ -79,13 +79,14 @@ if __name__ == '__main__':
     scheduler_gamma = 0.5
 
     # --- model-specific hyperparameters ---
+    kernel_sizes=5
     model_config = {
     "input_sizes": (1, 64, 64),
     "convol_channels": [16, 32],
     "output_dim": 15,
-    "kernel_sizes": 5,
+    "kernel_sizes": kernel_sizes,
     "stride": 1,
-    "padding": 2,  # (kernel_size-1)//2
+    "padding": int(kernel_sizes-1)//2,
     "use_maxpooling_every": 1,
     "pooling_size": 2,
     "fc_layer_sizes": [128],
@@ -147,9 +148,9 @@ if __name__ == '__main__':
 
 
         # Save checkpoint every few epochs (optional)
-        if epoch % 5 == 0 or epoch == epochs:
-            checkpoint_path = f"./results/checkpoint_{timestamp}_epoch{epoch}.pt"
-            save_checkpoint(checkpoint_path, model, optimizer, epoch=epoch, seed=SEED)
+        # if epoch % 5 == 0 or epoch == epochs:
+        #     checkpoint_path = f"./results/checkpoint_{timestamp}_epoch{epoch}.pt"
+        #     save_checkpoint(checkpoint_path, model, optimizer, epoch=epoch, seed=SEED)
 
 
     # -----------------------------
@@ -180,3 +181,4 @@ if __name__ == '__main__':
     final_weights_path = f"./results/weights_{timestamp}.pt"
     torch.save(model.state_dict(), final_weights_path)
     print(f"Model weights saved to: {final_weights_path}")
+

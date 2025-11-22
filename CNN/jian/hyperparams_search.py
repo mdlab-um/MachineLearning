@@ -53,11 +53,11 @@ def evaluate(model, criterion, loader):
 # ----------------------------
 def objective(trial):
     # Hyperparameter search space
-    seed = trial.suggest_categorical("seed", [42, 123, 456, 789, 1024])
+    seed = trial.suggest_int("seed", 1, 10000)
     channel1 = trial.suggest_categorical("channel1", [16, 32])
     channel2 = trial.suggest_categorical("channel2", [16, 32])
-    kernel_sizes = trial.suggest_categorical("kernel_size", [3, 5, 7])
-    dropout = trial.suggest_categorical("dropout", [0.2])
+    kernel_sizes = trial.suggest_categorical("kernel_size", [3, 5, 7, 9])
+    dropout = trial.suggest_categorical("dropout", [0.2, 0.4])
     # lr = trial.suggest_loguniform("lr", 1e-5, 1e-2)
     # activation = trial.suggest_categorical("activation", ["relu",])
 
@@ -111,12 +111,12 @@ def objective(trial):
     return val_acc  # Optuna maximizes objective
 
 
-if __name__='__main__':
+if __name__=='__main__':
     # ----------------------------
     # Run Optuna study
     # ----------------------------
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=16)  # adjust n_trials
+    study.optimize(objective, n_trials=15)  # adjust n_trials
 
     # ----------------------------
     # Save results to CSV
@@ -125,5 +125,6 @@ if __name__='__main__':
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     df = study.trials_dataframe()
     df.to_csv(f"./results/hypersearch_results_{timestamp}.csv", index=False)
+    print(f"Saved: ./results/hypersearch_results_{timestamp}.csv")
     print("Best hyperparameters:", study.best_trial.params)
     print("Best validation loss:", study.best_trial.value)
