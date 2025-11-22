@@ -37,7 +37,7 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num
 
 # --- model-specific hyperparameters ---
 input_dim = 64*64
-layer_sizes = [256, 128, 64]
+layer_sizes = [256, 256]
 output_dim = 15
 dropout=0.2
 activation="relu"

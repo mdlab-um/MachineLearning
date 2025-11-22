@@ -2,8 +2,7 @@
     "input_dim": 4096,
     "layer_sizes": [
         256,
-        128,
-        64
+        256
     ],
     "output_dim": 15,
     "activation": "relu",

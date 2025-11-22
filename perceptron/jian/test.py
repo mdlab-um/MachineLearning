@@ -86,6 +86,9 @@ def get_predictions_and_confusion(model, test_dataset, batch_size=64):
     plt.xlabel("Predicted Label")
     plt.ylabel("True Label")
     plt.title("Confusion Matrix")
+    import os
+    os.makedirs('./results', exist_ok=True)
+    plt.savefig('./results/testing_confmat.png')
     plt.show()
 
     return all_labels, all_preds, cm
