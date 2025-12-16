@@ -1,5 +1,4 @@
 # Overview
-Implementation of RNN, LSTM, GRU, or Transformer varaint is allowed
 This task focuses on binary sentiment classification of movie reviews using the IMDB Movie Reviews Dataset.
 The goal is to classify each review as positive or negative based on its textual content.
 
