@@ -101,9 +101,9 @@ if __name__ == '__main__':
     print(f"Using device: {device}")
 
     # --- Hyperparameters ---
-    batch_size = 16
-    epochs = 20
-    learning_rate = 1e-4 # Reduced LR is usually better for Transformers
+    batch_size = 64
+    epochs = 10
+    learning_rate = 1e-3 # Reduced LR is usually better for Transformers
     scheduler_stepsize = 10
     scheduler_gamma = 0.5
 

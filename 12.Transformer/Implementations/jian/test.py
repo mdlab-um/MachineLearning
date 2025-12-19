@@ -5,53 +5,47 @@ from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-from datasets import test_dataset, device
-from CNN import CNN, ACTIVATIONS
 import json
 import sys
+import os
 
-# --- Load config ---
-with open(sys.argv[1], "r") as f:
+# --- Imports tailored to your new project structure ---
+from IMDB_ReviewDatasets import test_dataset
+from IMDBtransformer import IMDBTransformerClassifier
+from pytorch_utils import get_dataloader
+
+# --- 1. Load config & weights from command line ---
+if len(sys.argv) < 3:
+    print("Usage: python test.py <config_path> <weights_path>")
+    sys.exit(1)
+
+config_path = sys.argv[1]
+weights_path = sys.argv[2]
+
+with open(config_path, "r") as f:
     cfg = json.load(f)
 
+# --- 2. Initialize Model ---
+# We unpack the config dictionary directly into the Transformer class
+model = IMDBTransformerClassifier(**cfg)
 
-model = CNN(**cfg)
+# --- 3. Load Weights ---
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.load_state_dict(torch.load(weights_path, map_location=device))
+model.to(device)
+model.eval()
 
-# model = CNN(
-#     input_sizes=cfg["input_sizes"],
-#     convol_channels=cfg["convol_channels"],
-#     output_dim=cfg["output_dim"],
-#     kernel_sizes=cfg["kernel_sizes"],
-#     stride=cfg["stride"],
-#     padding=cfg["padding"],
-#     use_maxpooling_every=cfg["use_maxpooling_every"],
-#     pooling_size=cfg["pooling_size"],
-#     fc_layer_sizes=cfg["fc_layer_sizes"],
-#     activation=cfg["activation"],
-#     use_batchnorm=cfg["use_batchnorm"],
-#     dropout=cfg["dropout"]
-# )
-
-# -- Load weights --
-model.load_state_dict(torch.load(sys.argv[2], map_location="cpu"))
-
-# --- Number of parameters ---
+# --- Print Params ---
 num_params = sum(p.numel() for p in model.parameters())
-num_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
-
 print(f"Total parameters: {num_params:,}")
-print(f"Trainable parameters: {num_trainable:,}")
 
 
-def get_predictions_and_confusion(model, test_dataset, batch_size=64):
+def get_predictions_and_confusion(model, test_dataset, batch_size=16):
     """
-    Get predictions for the entire test dataset and plot a confusion matrix.
+    Get predictions for the entire test dataset and plot a binary confusion matrix.
     """
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model.to(device)
-    model.eval()
-
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    # Use the helper to get a loader (handles collation if needed)
+    test_loader = get_dataloader(test_dataset, batch_size=batch_size, shuffle=False)
 
     all_labels = []
     all_preds = []
@@ -59,14 +53,26 @@ def get_predictions_and_confusion(model, test_dataset, batch_size=64):
     correct = 0
     total = 0
     criterion = nn.CrossEntropyLoss()
-    with torch.no_grad():
-        for images, labels in test_loader:
-            images = images.to(device)
-            labels = labels.to(device)
 
-            outputs = model(images)
+    print("Running evaluation...")
+
+    with torch.no_grad():
+        for batch in test_loader:
+            # 1. Unpack Batch (Dictionary from HuggingFace)
+            input_ids = batch['input_ids'].to(device)
+            labels = batch['label'].to(device)
+            hf_mask = batch['attention_mask'].to(device)
+
+            # 2. Generate Padding Mask (True where padding exists)
+            padding_mask = (hf_mask == 0)
+
+            # 3. Forward Pass
+            outputs = model(input_ids, padding_mask)
+
+            # 4. Metrics
             loss = criterion(outputs, labels)
-            test_loss += loss.item() * images.size(0)
+            test_loss += loss.item() * input_ids.size(0)
+
             _, preds = outputs.max(1)
 
             all_labels.append(labels.cpu())
@@ -75,6 +81,7 @@ def get_predictions_and_confusion(model, test_dataset, batch_size=64):
             total += labels.size(0)
             correct += preds.eq(labels).sum().item()
 
+    # Calculate final metrics
     test_loss /= total
     test_acc = correct / total
 
@@ -84,24 +91,31 @@ def get_predictions_and_confusion(model, test_dataset, batch_size=64):
     all_labels = torch.cat(all_labels).numpy()
     all_preds = torch.cat(all_preds).numpy()
 
-    # print(all_labels.shape)
+    # --- Confusion Matrix (Binary: 0=Negative, 1=Positive) ---
+    cm = confusion_matrix(all_labels, all_preds, labels=[0, 1])
 
-    # Compute confusion matrix
-    cm = confusion_matrix(all_labels, all_preds, labels=np.arange(15))
-
-    # Plot confusion matrix
+    # Plot
     plt.figure(figsize=(6, 5))
+
+    # Define labels for the plot
+    class_names = ['Negative', 'Positive']
+
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                xticklabels=np.arange(15), yticklabels=np.arange(15))
+                xticklabels=class_names, yticklabels=class_names)
+
     plt.xlabel("Predicted Label")
     plt.ylabel("True Label")
-    plt.title("Confusion Matrix")
-    # save out
-    import os
+    plt.title(f"Confusion Matrix\nAccuracy: {test_acc:.2%}")
+
+    # Save output
     os.makedirs('./results', exist_ok=True)
-    plt.savefig('./results/testing_confmat.png')
+    save_path = './results/testing_confmat.png'
+    plt.savefig(save_path)
+    print(f"Confusion matrix saved to {save_path}")
     plt.show()
 
     return all_labels, all_preds, cm
 
-all_labels, all_preds, cm = get_predictions_and_confusion(model, test_dataset)
+# Run the evaluation
+if __name__ == "__main__":
+    all_labels, all_preds, cm = get_predictions_and_confusion(model, test_dataset)

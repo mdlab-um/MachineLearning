@@ -26,3 +26,16 @@ In `IMDB_ReviewDatasets.py`, I splitted the original datasets into 70% for train
 ```python
 from IMDB_ReviewDatasets import train_dataset, val_dataset, test_dataset
 ```
+
+## Training
+```python
+python train.py
+```
+Model configuration json, trained weights will be saved to `./results`
+
+## Testing
+```python
+python test.py
+python history_plot.py ./results/training_history_20251219_111841.csv
+```
+Model testing result will be saved to `./results`
