@@ -41,7 +41,7 @@ Model configuration json, trained weights will be saved to `./results`
 - `Model configurations`: model_config_20251219_111841.json
 - `weights`: weights_20251219_111841.pt
 
-![Training Loss/Accuracy history plot])./results/training_history.png)
+![Training Loss/Accuracy history plot](./results/training_history.png)
 
 ## Testing
 
